@@ -1,0 +1,233 @@
+<!--
+
+    Copyright (C) 2011 ArtiVisi Intermedia <info@artivisi.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="1" author="endy">
+        <createTable tableName="c_application_config">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints unique="true" nullable="false" />
+            </column>
+            <column name="label" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="c_security_menu">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="label" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="menu_action" type="varchar(255)"/>
+            <column name="menu_level" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="menu_order" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="menu_options" type="varchar(255)"/>
+            <column name="id_parent" type="varchar(255)" />
+        </createTable>
+        
+        <createTable tableName="c_security_permission">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="permission_label" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="permission_value" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        
+        <createTable tableName="c_security_role">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="varchar(255)" />
+        </createTable>
+        <createTable tableName="c_security_role_permission">
+            <column name="id_role" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="id_permission" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="c_security_role_menu">
+            <column name="id_role" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="id_menu" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="c_security_user">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="fullname" type="varchar(255)" />
+            <column name="active" type="boolean" />
+            <column name="id_role" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="photo" type="varchar(255)" />
+        </createTable>
+        
+        <createTable tableName="tbl_barang">
+            <column  name="id" type="VARCHAR(100)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="kdbrg" type="CHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="nama" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="harga" type="DECIMAL(10,0)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="stok" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <modifySql dbms="mysql">
+            <append value=" engine innodb" />
+        </modifySql>
+    </changeSet>
+    <changeSet id="2" author="endy">
+        <addForeignKeyConstraint
+            constraintName="fk_menu_parent"
+            baseColumnNames="id_parent"
+            baseTableName="c_security_menu"
+            referencedTableName="c_security_menu"
+            referencedColumnNames="id"
+        />
+        <addUniqueConstraint
+            constraintName="unique_permission_value"
+            columnNames="permission_value"
+            tableName="c_security_permission"
+        />
+        <addUniqueConstraint
+            constraintName="unique_role_name"
+            columnNames="name"
+            tableName="c_security_role"
+        />
+        <addForeignKeyConstraint
+            constraintName="fk_role_permission_role"
+            baseColumnNames="id_role"
+            baseTableName="c_security_role_permission"
+            referencedTableName="c_security_role"
+            referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+            constraintName="fk_role_permission_permission"
+            baseColumnNames="id_permission"
+            baseTableName="c_security_role_permission"
+            referencedTableName="c_security_permission"
+            referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+            constraintName="fk_role_menu_role"
+            baseColumnNames="id_role"
+            baseTableName="c_security_role_menu"
+            referencedTableName="c_security_role"
+            referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+            constraintName="fk_role_menu_menu"
+            baseColumnNames="id_menu"
+            baseTableName="c_security_role_menu"
+            referencedTableName="c_security_menu"
+            referencedColumnNames="id"
+        />
+        <addUniqueConstraint
+            constraintName="unique_user_username"
+            columnNames="username"
+            tableName="c_security_user"
+        />
+        <addForeignKeyConstraint
+            constraintName="fk_user_role"
+            baseColumnNames="id_role"
+            baseTableName="c_security_user"
+            referencedTableName="c_security_role"
+            referencedColumnNames="id"
+        />
+        <addUniqueConstraint
+            constraintName="unique_produk_kdbrg"
+            columnNames="kdbrg"
+            tableName="tbl_barang"
+        />
+    </changeSet>
+    <changeSet id="3" author="endy">
+        <loadData tableName="c_security_menu" file="com/artivisi/belajar/restful/db/data/menu.csv">
+            <column header="id" type="STRING"/>
+            <column header="label" type="STRING"/>
+            <column header="menu_action" type="STRING"/>
+            <column header="menu_level" type="NUMERIC"/>
+            <column header="menu_order" type="NUMERIC"/>
+            <column header="menu_options" type="STRING"/>
+            <column header="id_parent" type="STRING"/>
+        </loadData>
+        <loadData tableName="c_security_permission" file="com/artivisi/belajar/restful/db/data/permission.csv">
+            <column header="id" type="STRING"/>
+            <column header="permission_label" type="STRING"/>
+            <column header="permission_value" type="STRING"/>
+        </loadData>
+        <loadData tableName="c_security_role" file="com/artivisi/belajar/restful/db/data/role.csv">
+            <column header="id" type="STRING"/>
+            <column header="name" type="STRING"/>
+            <column header="description" type="STRING"/>
+        </loadData>
+        <loadData tableName="c_security_role_menu" file="com/artivisi/belajar/restful/db/data/role_menu.csv">
+            <column header="id_role" type="STRING"/>
+            <column header="id_menu" type="STRING"/>
+        </loadData>
+        <loadData tableName="c_security_role_permission" file="com/artivisi/belajar/restful/db/data/role_permission.csv">
+            <column header="id_role" type="STRING"/>
+            <column header="id_permission" type="STRING"/>
+        </loadData>
+        <loadData tableName="c_security_user" file="com/artivisi/belajar/restful/db/data/user.csv">
+            <column header="id" type="STRING"/>
+            <column header="username" type="STRING"/>
+            <column header="fullname" type="STRING"/>
+            <column header="password" type="STRING"/>
+            <column header="active" type="BOOLEAN"/>
+            <column header="id_role" type="STRING"/>
+        </loadData>
+    </changeSet>
+</databaseChangeLog>
